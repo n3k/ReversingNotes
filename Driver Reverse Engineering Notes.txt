@@ -1,0 +1,175 @@
+Settings Windows Symbols:
+
+set _NT_SYMBOL_PATH=SRV *D:\Windows10_Symbols*http://msdl.microsoft.com/download/symbols
+SRV*D:\Windows10_Symbols*http://msdl.microsoft.com/download/symbols
+kd -k com:pipe,port=\\.\pipe\windows10dbg,resets=0,reconnect
+
+@echo off
+set _NT_SYMBOL_PATH=SRV *D:\Windows10_Symbols*http://msdl.microsoft.com/download/symbols
+"C:\Program Files (x86)\Windows Kits\8.0\Debuggers\x64\kd.exe" -k com:pipe,port=\\.\pipe\windows10dbg,resets=0,reconnect
+
+
+I ran into a problem when trying to use the deferred loading mode... 
+By executing the next two commands I realized the problem was http://msdl.microsoft.com/download/symbols
+
+!sym noisy
+.reload nt
+
+So I installed manually the symbols and then switched the source to apropiate folder:
+
+.sympath F:\Windows10_Symbols
+.reload
+
+=========================================================================================================
+
+
+
+NTStatus codes: ftp://ztchs.p.lodz.pl/WDInf/Programy/Dev-Cpp/include/ddk/ntstatus.h
+
+I/O Completion Routines:
+
+There are only 3 valid return codes from an I/O Completion Routine:
+
+STATUS_SUCCESS 0x00000000
+STATUS_MORE_PROCESSING_REQUIRED (0xC0000016)
+STATUS_CONTINUE_COMPLETION:
+
+
+ If a driver returns anything except STATUS_PENDING in its dispatch routine, the IRP being dispatched will be completed by the I/O manager. 
+
+References:
+https://www.osronline.com/article.cfm?article=214
+https://www.osronline.com/article.cfm?article=83
+https://www.osronline.com/article.cfm?article=87
+
+dt _IO_STACK_LOCATION
+   +0x000 MajorFunction    : UChar
+   +0x001 MinorFunction    : UChar
+   +0x002 Flags            : UChar
+   +0x003 Control          : UChar
+   +0x004 Parameters       : __unnamed
+		+0x000 OutputBufferLength : Uint4B
+        +0x004 InputBufferLength : Uint4B
+        +0x008 IoControlCode    : Uint4B
+        +0x00c Type3InputBuffer : Ptr32 Void
+   +0x014 DeviceObject     : Ptr32 _DEVICE_OBJECT
+   +0x018 FileObject       : Ptr32 _FILE_OBJECT
+   +0x01c CompletionRoutine : Ptr32    
+   +0x020 Context          : Ptr32 Void
+
+
+ntdll!_IRP
+   +0x000 Type             : Int2B
+   +0x002 Size             : Uint2B
+   +0x004 MdlAddress       : Ptr32 _MDL
+   +0x008 Flags            : Uint4B
+   +0x00c AssociatedIrp    : __unnamed
+   +0x010 ThreadListEntry  : _LIST_ENTRY
+   +0x018 IoStatus         : _IO_STATUS_BLOCK
+   +0x020 RequestorMode    : Char
+   +0x021 PendingReturned  : UChar
+   +0x022 StackCount       : Char
+   +0x023 CurrentLocation  : Char
+   +0x024 Cancel           : UChar
+   +0x025 CancelIrql       : UChar
+   +0x026 ApcEnvironment   : Char
+   +0x027 AllocationFlags  : UChar
+   +0x028 UserIosb         : Ptr32 _IO_STATUS_BLOCK
+   +0x02c UserEvent        : Ptr32 _KEVENT
+   +0x030 Overlay          : __unnamed
+   +0x038 CancelRoutine    : Ptr32     void 
+   +0x03c UserBuffer       : Ptr32 Void
+   +0x040 Tail             : __unnamed
+
+   [Inputbuff , inputbufflen, outputbufff, outputbuflen]
+   
+   
+   
+Driver Security:
++] Protecting Drivers: http://www.osronline.com/article.cfm?article=100
++] http://blackwhitemu.blogspot.com.ar/2007/10/how-safe-is-your-device-namespace.html
++] http://www.osronline.com/article.cfm?article=56
++] http://www.osronline.com/article.cfm?article=50
++] http://www.osronline.com/article.cfm?article=23
+
+   
+Useul Windbg Commands:
+=====================
+
++] Dumping SSDT:
+
+	dds poi(nt!KeServiceDescriptorTable) L poi(nt!KeServiceDescriptorTable+8)
+	
+	dds poi(nt!KeServiceDescriptorTableShadow+10) L poi(nt!KeServiceDescriptorTableShadow+18)
+	
+
++] !object \ObjectTypes		-> Lists Objects Types
+
++] !object ffffe001b9702560    -> Identifies the Object
+
+	Object: ffffe001b9702560  Type: (ffffe001b89c5f20) UserApcReserve
+		ObjectHeader: ffffe001b9702530 (new version)
+		HandleCount: 1  PointerCount: 1
+		
++] dt _OBJECT_TYPE ffffe001b89c5f20	
+
++] Resolving SYSCALLS in Windows x64
+	
+	1) First Get the Base of the KiServiceTable:
+		dps nt!KeServiceDescriptorTable 
+		fffff801`4dbc6a80  fffff801`4d9c9a00 nt!KiServiceTable
+		
+		KiServiceTable Base: fffff8014d9c9a00
+	
+	2) Get the Index of the SYSCALL by Dumping the ntdll CALL
+		Example: 0x70
+	
+	3) Get the Value from the Table:
+		kd> dd nt!KiServiceTable + (0x70*4) L1
+		fffff801`4d9c9bc0  03c34d40
+		
+		Value: 03c34d40 --> This has encoded the offset and the number of arguments
+		
+	4) Decode the offset and add it to the KiServiceTable Base:
+	
+		FUNCTION ADDRESS = 03c34d40>>4 + fffff8014d9c9a00 = FFFFF8014DD8CED4
+		
++] Command to Debug specific process from Kernel Mode debugger:
+
+	.process /r /p ffffe001e9274080
+
+
++] Detect Debuggers:
+
+Windows provides support for detecting and defeating the debuggers inside kernel. You can use exported variable KdDebuggerEnabled of ntoskrnl to detect if the machine is being debugged by kernel debugger. The good place to perform this check in the DriverEntry routine of your driver.
+
+The nt!KdDebuggerNotPresent global variable will be set to zero if a debugger is present. If a debugger is not present, the value will be one (default).
+
+
+
+== NDIS Driver Programming ==
+
+NDIS Filter Drivers: https://msdn.microsoft.com/en-us/library/windows/hardware/ff565501(v=vs.85).aspx
+
+Security Issues for Network Drivers: https://msdn.microsoft.com/en-us/library/windows/hardware/ff570745(v=vs.85).aspx
+
+NET_BUFFER Architecture: https://msdn.microsoft.com/en-us/library/windows/hardware/ff568377(v=vs.85).aspx
+
+Introduction To NDIS Filter Drivers: https://msdn.microsoft.com/en-us/library/windows/hardware/ff556030(v=vs.85).aspx
+
+NDIS Filter Driver Reference: https://msdn.microsoft.com/en-us/library/windows/hardware/ff565527(v=vs.85).aspx
+
+Writing NDIS Filter Drivers: https://msdn.microsoft.com/en-us/library/windows/hardware/ff571103(v=vs.85).aspx
+
+
++] IDT on Every Processor:
+
+Each CPU has its own IDT, and they can be viewed by the WinDBG command !kdex2x86.idt
+
++] To see the IRQL of the code you were:
+
+> !irql
+
+
+
+
