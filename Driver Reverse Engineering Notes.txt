@@ -96,6 +96,16 @@ Driver Security:
 Useul Windbg Commands:
 =====================
 
++] .logopen <filename> 
++] .logappend <filename>
++] .logclose
+Note: If you use the /t option, the date and time are appended to your specified file name.
+
+
++] Dump with Ranges:
+
+    dd esp L?0x200
+
 +] Dumping SSDT:
 
 	dds poi(nt!KeServiceDescriptorTable) L poi(nt!KeServiceDescriptorTable+8)
@@ -104,6 +114,10 @@ Useul Windbg Commands:
 	
 
 +] !object \ObjectTypes		-> Lists Objects Types
+
++] !object \Driver          -> List all the Driver objects
+
++] !object \Device 			-> List All the Devices objects
 
 +] !object ffffe001b9702560    -> Identifies the Object
 
@@ -137,6 +151,38 @@ Useul Windbg Commands:
 +] Command to Debug specific process from Kernel Mode debugger:
 
 	.process /r /p ffffe001e9274080
+
+
+
++] Some Windbg conditional breakpoints and instructions to perform:
+
+ba e 1 87F3BD88 ".if ( @ = 0x0e) {.echo IOCTL Operation found} .else {gc}"
+
+ba e 1 87ED889D ".if ((poi(ebx) & 0x0`0000000f) = 0xe)  { .echo IOCTL Operation found } .else {gc}"
+
+ba e 1 8D74F7C0 ".printf \"Size: %08x \\n\", dwo(poi(esp+8)+C);"
+
+
+Using $t0 register:
+
+ba e 1 8D74F7C0 "r @$t0 = (poi(esp+8)+C) ;.printf \"%08x \\n\", dwo($t0);" ///dwo() actually access to the memory address content at $t0
+
+// DxgkDdiEscape()
+ba e 1 8cf4e7c0 "r @$t0 = poi((poi(esp+8)+C)); .printf \"Size of data: %08x \\n\", $t0; r @$t0 = $t0/4;  r @$t1 = poi((poi(esp+8)+8));  dd $t1 L?$t0;"
+
+Note: there are $t0-$t20 user registers to use
+
+	
++] Get PxE from VirtualAddress:
+------------------------------
+
+def get_pxe(address):
+    result = address>>9
+    result = result | 0xFFFFF68000000000
+    result = result & 0xFFFFF6FFFFFFFFF8
+    return result
+
+print hex(get_pxe(0xfffff6fb44020100))
 
 
 +] Detect Debuggers:
