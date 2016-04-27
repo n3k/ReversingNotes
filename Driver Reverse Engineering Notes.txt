@@ -22,7 +22,15 @@ So I installed manually the symbols and then switched the source to apropiate fo
 
 =========================================================================================================
 
+Setup Network Debugger 
 
+bcdedit /debug on
+bcdedit /dbgsettings net hostip:192.168.0.10 port:50002 key:1.2.3.4
+bcdedit /set "{dbgsettings}" busparams 1.0.0
+bcdedit /set {bootmgr} displaybootmenu yes
+pause
+
+=========================================================================================================
 
 NTStatus codes: ftp://ztchs.p.lodz.pl/WDInf/Programy/Dev-Cpp/include/ddk/ntstatus.h
 
