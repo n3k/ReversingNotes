@@ -180,6 +180,9 @@ ba e 1 8cf4e7c0 "r @$t0 = poi((poi(esp+8)+C)); .printf \"Size of data: %08x \\n\
 
 Note: there are $t0-$t20 user registers to use
 
+
+ba e 1 ntdll!RtlpWalkHeap "r @$t0 = (poi(rdx)); .if (@$t0 != 0x386f80)  {.printf \"ChunkPtr: %08x \\n\", qwo(rdx); gc; } .else { .echo Chunk Found }"
+
 	
 +] Get PxE from VirtualAddress:
 ------------------------------
