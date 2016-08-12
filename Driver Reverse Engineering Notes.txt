@@ -183,6 +183,14 @@ Note: there are $t0-$t20 user registers to use
 
 ba e 1 ntdll!RtlpWalkHeap "r @$t0 = (poi(rdx)); .if (@$t0 != 0x386f80)  {.printf \"ChunkPtr: %08x \\n\", qwo(rdx); gc; } .else { .echo Chunk Found }"
 
+
+///////////////////////
+
++] !threads --> to list all the application threads
+
++] ~~[threadID]e <command> --> to execute a command over the given thread
+   For instance: ~~[0x101]e kb  --> shows the call stack of the thread 0x101
+
 	
 +] Get PxE from VirtualAddress:
 ------------------------------
