@@ -236,5 +236,18 @@ Each CPU has its own IDT, and they can be viewed by the WinDBG command !kdex2x86
 > !irql
 
 
++] Some useful Linux debugging commands:
+
+# strace -f ./binary
+
+# gdb ./binary
+>> set follow-fork-mode child
+>> set disassembly-flavor intel
+>> tui enable
+>> set layout asm
+>> r
+
+
+
 
 
