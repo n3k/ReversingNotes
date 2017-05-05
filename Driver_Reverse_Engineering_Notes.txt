@@ -159,6 +159,12 @@ Note: If you use the /t option, the date and time are appended to your specified
 +] Command to Debug specific process from Kernel Mode debugger:
 
 	.process /r /p ffffe001e9274080
+	
+	To set a breakpoint in usermode from kernel debugger:
+	
+	.process /r /p <eprocess>
+	.reload -user
+	bp /p <eprocess> kernel32!CreateFileA
 
 
 
