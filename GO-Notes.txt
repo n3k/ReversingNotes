@@ -1,0 +1,63 @@
+// https://research.swtch.com/goabstract
+
+struct string {
+	char *str;
+	uint_64 len;
+}
+
+struct slice {
+	char *str;
+	uint_64 begin;
+	uint_64 end;
+}
+
+struct Interface {
+	PVOID runtimeType;
+	PVOID data;
+}
+
+	Example:
+
+		type T struct {
+		   X int8
+		   Y int8
+		}
+
+		var e interface{} = &T{Y:100, X:42}
+
+		[ T Type | Pointer to T instance ]
+
+
+goroutines are compiled to the next thing:
+
+mov [rsp+0x10], first param
+mov [rsp+0x08], offset offset routine
+mov [rsp], 8 -> numbers of bytes to copy into the new stack. // 8 because x64 and just one param of an 8bytes type
+call runtime_newproc
+
+
+Return values do not come in RAX, but are written into the stack position above the Return Address of the function -> the callee writes into the caller stack
+All functions that return values also return an error, it's not unusual to find the next instructions after the call of a function:
+
+func sayHello(mystr string) string {
+	var t string = "Hello " + mystr
+	return t
+}
+
+lea rax, offset str_world
+mov [rsp], rax
+mov [rsp+8], 6 // len("world ")
+call main_sayHello
+mov rax, [rsp+0x10] // result
+mov rcx, [rsp+0x18] // error
+
+If the routine doesn't receive parameters, the intructions are like the next ones:
+
+call main_sayHello  
+mov rax, [rsp] // result
+mov rcx, [rsp+0x08] // error
+
+
+
+
+
