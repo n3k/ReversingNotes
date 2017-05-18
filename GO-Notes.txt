@@ -1,14 +1,18 @@
 // https://research.swtch.com/goabstract
+// https://research.swtch.com/godata
+// https://research.swtch.com/interfaces
 
 struct string {
 	char *str;
 	uint_64 len;
 }
 
+A slice is a reference to a section of an array. In memory, it is a 3-word structure contaning a pointer to the first element, the length of the slice, and the capacity. The length is the upper bound for indexing operations like x[i] while the capacity is the upper bound for slice operations like x[i:j].
+
 struct slice {
 	char *str;
-	uint_64 begin;
-	uint_64 end;
+	uint_64 length;
+	uint_64 capacity;
 }
 
 struct Interface {
@@ -58,6 +62,8 @@ mov rax, [rsp] // result
 mov rcx, [rsp+0x08] // error
 
 
+
+Go has two data structure creation functions: new and make. The distinction is a common early point of confusion but seems to quickly become natural. The basic distinction is that new(T) returns a *T, a pointer that Go programs can dereference implicitly (the black pointers in the diagrams), while make(T, args) returns an ordinary T, not a pointer. Often that T has inside it some implicit pointers (the gray pointers in the diagrams). New returns a pointer to zeroed memory, while make returns a complex structure.
 
 
 
