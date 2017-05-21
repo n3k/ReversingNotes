@@ -246,6 +246,8 @@ Each CPU has its own IDT, and they can be viewed by the WinDBG command !kdex2x86
 
 # strace -f ./binary
 
+ echo "set dis intel" > ~/.gdbinit
+
 # gdb ./binary
 >> set follow-fork-mode child
 >> set disassembly-flavor intel
