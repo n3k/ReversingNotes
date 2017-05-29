@@ -102,4 +102,22 @@ Runtime_newobject has the following signature:
 +] func newobject(typ *byte) *any
 
 
+func stringtoslicebyte(buf *tmpBuf, s string) []byte {
+  	var b []byte
+  	if buf != nil && len(s) <= len(buf) {
+  		*buf = tmpBuf{}
+  		b = buf[:len(s)]
+  	} else {
+  		b = rawbyteslice(len(s))
+  	}
+  	copy(b, s)
+  	return b
+  }
+  
+mov     qword ptr [rsp], 0  ; tmpBuf NULL
+lea     rbx, ahello_world ; "hello world!!!!!"
+mov     [rsp+8], rbx   ; ptr STR
+mov     qword ptr [rsp+10h], 10h  ; length
+call    runtime_stringtoslicebyte
 
+The call places a string object into the stack more than a pointer to a string object!!
