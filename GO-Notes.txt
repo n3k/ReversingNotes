@@ -1,6 +1,11 @@
 // https://research.swtch.com/goabstract
 // https://research.swtch.com/godata
 // https://research.swtch.com/interfaces
+// https://blog.altoros.com/golang-internals-part-2-diving-into-the-go-compiler.html
+// Go Pointers: http://learngowith.me/gos-pointer-pointer-type/
+// https://golang.org/src/runtime/type.go
+// https://blog.golang.org/go-slices-usage-and-internals
+
 
 struct string {
 	char *str;
@@ -121,3 +126,23 @@ mov     qword ptr [rsp+10h], 10h  ; length
 call    runtime_stringtoslicebyte
 
 The call places a string object into the stack more than a pointer to a string object!!
+
+
+
+
+func typ2Itab(t *_type, inter *interfacetype, cache **itab) *itab {
+	tab := getitab(inter, t, false)
+	atomicstorep(unsafe.Pointer(cache), unsafe.Pointer(tab))
+	return tab
+}
+
+type itab struct {
+	0x00	inter  *interfacetype
+	0x08	_type  *_type
+	0x10	link   *itab
+	0x18	bad    int32
+	0x1C	unused int32
+	0x20	fun    [1]uintptr // variable sized
+}
+
+The last property, fun, is defined as an array of one element, but it is actually variable-sized. This property contains an array of pointers to methods defined in a particular type. 
