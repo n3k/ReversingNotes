@@ -20,6 +20,26 @@ So I installed manually the symbols and then switched the source to apropiate fo
 .sympath F:\Windows10_Symbols
 .reload
 
+
+Microsoft PDB Symbols in IDA:
+
+_NT_SYMBOL_PATH=SRV*c:\symbols*https://msdl.microsoft.com/download/symbols
+
+https://amk1.wordpress.com/2009/11/26/loading-symbols-in-ida-pro/
+Loading symbols in IDA Pro
+IDA Pro has included symbol loading facility some time back. But different installations had yield different results; sometimes symbol loading works, sometimes it didn’t. This has led me to scratch my head for an extended period of time until now.
+
+What happened is when IDA ask the following:
+
+IDA Pro has determined that the input file was linked with debug information. Do you want to look for the corresponding PDB file at the local symbol store and the Microsoft Symbol Server?
+
+it made use of its dbghelp.dll and symsrv.dll to load the symbols. We are supposed to accept Microsoft’s terms for using their symbols, but since symsrv.dll is used directly by the plugin the prompt to accept the terms is not displayed, the license cannot be accepted, and hence the symbol loading fails.
+
+The solution is to include an empty symsrv.yes file alongside symsrv.dll in IDA’s directory to indicate that we’d gladly accept the terms that never appear.
+
+
+
+
 =========================================================================================================
 
 Setup Network Debugger 
@@ -29,6 +49,19 @@ bcdedit /dbgsettings net hostip:192.168.0.10 port:50002 key:1.2.3.4
 bcdedit /set "{dbgsettings}" busparams 1.0.0
 bcdedit /set {bootmgr} displaybootmenu yes
 pause
+
+
+
+REM Adds a new boot entry with the Description as "DebugEntry"
+bcdedit /copy {current} /d "DebugEntry"   
+REM Set debug on the new entry
+bcdedit /debug {bed52458-f8b5-11e5-9bdc-005056c00008} on
+REM Configure the network debugger host
+bcdedit /dbgsettings net hostip:10.10.10.2 key:1.2.3.4 port:50002
+REM set the appropriate PCI bus device function for the network interface used
+bcdedit /set "{dbgsettings}" busparams 3.0.1
+REM Enable the displaybootmenu so we can select which entry we want to boot 
+bcdedit /set {bootmgr} displaybootmenu yes
 
 =========================================================================================================
 
