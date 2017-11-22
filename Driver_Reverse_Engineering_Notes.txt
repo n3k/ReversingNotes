@@ -266,6 +266,13 @@ NDIS Filter Driver Reference: https://msdn.microsoft.com/en-us/library/windows/h
 Writing NDIS Filter Drivers: https://msdn.microsoft.com/en-us/library/windows/hardware/ff571103(v=vs.85).aspx
 
 
+Enum MiniFilter Drivers:
+
+# fltmc --> list filter drivers
+# fltmc instances --> show instances
+# sc query <instance-name> 
+
+
 +] IDT on Every Processor:
 
 Each CPU has its own IDT, and they can be viewed by the WinDBG command !kdex2x86.idt
