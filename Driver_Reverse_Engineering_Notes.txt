@@ -297,5 +297,166 @@ Each CPU has its own IDT, and they can be viewed by the WinDBG command !kdex2x86
 
 
 
+0: kd> r $t0 = 0; .while (0x37 > @$t0) { r $t0; dd Driver+2092F0+28*$t0 L?0x01; r $t0 = @$t0+1; }
+$t0=0000000000000000
+fffff80f`da8092f0  00000000
+$t0=0000000000000001
+fffff80f`da809318  e4400001
+$t0=0000000000000002
+fffff80f`da809340  e4400002
+$t0=0000000000000003
+fffff80f`da809368  e440000c
+$t0=0000000000000004
+fffff80f`da809390  e440000d
+$t0=0000000000000005
+fffff80f`da8093b8  e4400006
+$t0=0000000000000006
+fffff80f`da8093e0  e4400064
+$t0=0000000000000007
+fffff80f`da809408  e4400008
+$t0=0000000000000008
+fffff80f`da809430  e4400007
+$t0=0000000000000009
+fffff80f`da809458  e440000b
+$t0=000000000000000a
+fffff80f`da809480  e4400066
+$t0=000000000000000b
+fffff80f`da8094a8  e4400069
+$t0=000000000000000c
+fffff80f`da8094d0  e440000e
+$t0=000000000000000d
+fffff80f`da8094f8  e440000f
+$t0=000000000000000e
+fffff80f`da809520  e4400013
+$t0=000000000000000f
+fffff80f`da809548  e4400025
+$t0=0000000000000010
+fffff80f`da809570  e4400055
+$t0=0000000000000011
+fffff80f`da809598  e440001c
+$t0=0000000000000012
+fffff80f`da8095c0  e4400004
+$t0=0000000000000013
+fffff80f`da8095e8  e440004b
+$t0=0000000000000014
+fffff80f`da809610  e4400051
+$t0=0000000000000015
+fffff80f`da809638  e440001d
+$t0=0000000000000016
+fffff80f`da809660  e440001e
+$t0=0000000000000017
+fffff80f`da809688  e440001f
+$t0=0000000000000018
+fffff80f`da8096b0  e4400024
+$t0=0000000000000019
+fffff80f`da8096d8  e440005d
+$t0=000000000000001a
+fffff80f`da809700  e440002e
+$t0=000000000000001b
+fffff80f`da809728  e4400057
+$t0=000000000000001c
+fffff80f`da809750  e4400056
+$t0=000000000000001d
+fffff80f`da809778  e4400052
+$t0=000000000000001e
+fffff80f`da8097a0  e4400053
+$t0=000000000000001f
+fffff80f`da8097c8  e4400058
+$t0=0000000000000020
+fffff80f`da8097f0  e4400029
+$t0=0000000000000021
+fffff80f`da809818  e440004f
+$t0=0000000000000022
+fffff80f`da809840  e4400050
+$t0=0000000000000023
+fffff80f`da809868  e4400020
+$t0=0000000000000024
+fffff80f`da809890  e4400022
+$t0=0000000000000025
+fffff80f`da8098b8  e440004e
+$t0=0000000000000026
+fffff80f`da8098e0  e4400059
+$t0=0000000000000027
+fffff80f`da809908  e4400075
+$t0=0000000000000028
+fffff80f`da809930  e440007c
+$t0=0000000000000029
+fffff80f`da809958  e4400063
+$t0=000000000000002a
+fffff80f`da809980  e440005a
+$t0=000000000000002b
+fffff80f`da8099a8  e4400005
+$t0=000000000000002c
+fffff80f`da8099d0  e4400009
+$t0=000000000000002d
+fffff80f`da8099f8  e440001a
+$t0=000000000000002e
+fffff80f`da809a20  e440006c
+$t0=000000000000002f
+fffff80f`da809a48  e440007b
+$t0=0000000000000030
+fffff80f`da809a70  e440007d
+$t0=0000000000000031
+fffff80f`da809a98  e4400077
+$t0=0000000000000032
+fffff80f`da809ac0  e4400078
+$t0=0000000000000033
+fffff80f`da809ae8  e4400080
+$t0=0000000000000034
+fffff80f`da809b10  e4400011
+$t0=0000000000000035
+fffff80f`da809b38  e440000a
+$t0=0000000000000036
+fffff80f`da809b60  e440007f
+
+
+NDIS WINDBG DEBUGGER EXTENSION::
+https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/-ndiskd-netadapter
+.load ndiskd
+!ndiskd.netadapter 
+!ndiskd.netadapter -handle <miniportHandle> -basic
+
+A driver is only allowed to cancel IRPs that it has allocated and sent to a lower levle driver. It must not try to cancel any IRPs sent to it by the I/O Manager or by a higher level driver.
+
++] RtlCreateSecurityDescriptor:	
+	
+A successful call to this routine initializes a security descriptor. The fields in this descriptor are set to initial values that indicate that there are no security constraints.
+	
++] The I/O manager determines that an I/O operation is using direct I/O as follows:+
+
+For IRP_MJ_READ and IRP_MJ_WRITE requests, DO_DIRECT_IO is set in the Flags member of the DEVICE_OBJECT structure. For more information, see Initializing a Device Object.
+
+For IRP_MJ_DEVICE_CONTROL and IRP_MJ_INTERNAL_DEVICE_CONTROL requests, the IOCTL code's value contains METHOD_IN_DIRECT or METHOD_OUT_DIRECT as the TransferType value in the IOCTL value. For more information, see Defining I/O Control Codes.
+
+
+JAE/JNB - Jump if above or equal/Jump if not below
+Jumps if the carry flag is not set. This always occurs if the first operand is higher as an unsigned integer (so a most significant bit of 1 is interpreted as 2^7 higher rather than a minus sign)
+
+JA/JNBE - Jump if above / Jump if not below or equal
+Jumps if the carry flag is not set and the z flag is not set. Checks for above the same way as JA, but makes sure they aren&#39;t equal as well.
+
+JB/JNAE - Jump if below / Jump if not above or equal
+Jumps if the carry flag is set. This occurs whenever the first operand is lower, since then the result would be below 0 but wraps around to high numbers.
+
+JBE/JNA - Jump if below or equal / Jump if not above
+Jumps if the carry flag is set or the z flag is set. Since the carry flag only tells us that the first one is below, we must check the z flag as well to check if they are equal.
+
+
+MmMapLockedPagesSpecifyCache
+
+If AccessMode is UserMode, be aware of the following details:
+
+The routine returns a user address that is valid in the context of the process 
+in which the driver is running. For example, if a 64-bit driver is running in 
+the context of a 32-bit application, the buffer is mapped to an address in the 
+32-bit address range of the application.
+
+MmUnmapLockedPages
+
+Note that if the call to MmMapLockedPages or MmMapLockedPagesSpecifyCache 
+specified user mode, the caller must be in the context of the original process 
+before calling MmUnmapLockedPages. This is because the unmapping operation 
+occurs in the context of the calling process, and, if the context is incorrect, 
+the unmapping operation could delete the address range of a random process.
 
 
