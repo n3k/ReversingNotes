@@ -1,0 +1,46 @@
+Reverse engineering RPC Servers:
+
+Find RpcServerRegisterIf | RpcServerRegisterIfEx | RpcServerRegisterIf2 | RpcServerRegisterIf3
+
+
+RPC_STATUS RpcServerRegisterIf3(
+  RPC_IF_HANDLE      IfSpec,   // ==> MIDL-generated structure indicating the interface to register.
+  UUID               *MgrTypeUuid,
+  RPC_MGR_EPV        *MgrEpv,
+  unsigned int       Flags,
+  unsigned int       MaxCalls,
+  unsigned int       MaxRpcSize,
+  RPC_IF_CALLBACK_FN *IfCallback,
+  void               *SecurityDescriptor
+);
+
+
+The RPC_IF_HANDLE is a pointer into a an _RPC_SERVER_INTERFACE:
+
+	struct _RPC_SERVER_INTERFACE
+	{
+		unsigned int Length;
+		RPC_SYNTAX_IDENTIFIER InterfaceId;
+		RPC_SYNTAX_IDENTIFIER TransferSyntax;
+		PRPC_DISPATCH_TABLE DispatchTable;
+		unsigned int RpcProtseqEndpointCount;
+		PRPC_PROTSEQ_ENDPOINT RpcProtseqEndpoint;
+		void *DefaultManagerEpv;
+		const void *InterpreterInfo; // ==> pointer to the MIDL_SERVER_INFO data structure
+		unsigned int Flags;
+	};
+	
+The InterpreterInfo of the interface specification is a pointer to the MIDL_SERVER_INFO data structure, which consists of a DispatchTable pointer that keeps the information of the interface APIs supported by the specific RPC interface.
+
+
+typedef struct _MIDL_SERVER_INFO_
+{
+	PMIDL_STUB_DESC pStubDesc;
+	const SERVER_ROUTINE* DispatchTable;  // --> Table of functions registered by the server
+	PFORMAT_STRING ProcString;
+	const unsigned short* FmtStringOffset;
+	const STUB_THUNK* ThunkTable;
+	PRPC_SYNTAX_IDENTIFIER pTransferSyntax;
+	ULONG_PTR nCount;
+	PMIDL_SYNTAX_INFO pSyntaxInfo;
+} MIDL_SERVER_INFO, *PMIDL_SERVER_INFO;
