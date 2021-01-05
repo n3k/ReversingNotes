@@ -1,0 +1,8 @@
+Generate log file tracing the program counter:
+
+set logging on
+set height 0
+while 1
+x/i $pc
+si
+end
