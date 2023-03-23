@@ -23471,3 +23471,80 @@ typedef struct _EFI_USB_IO_PROTOCOL {
 
   EFI_USB_IO_PORT_RESET                    UsbPortReset;
 } EFI_USB_IO_PROTOCOL;
+
+
+typedef struct {
+  UINT8    Dependencies[1];
+} EFI_FIRMWARE_IMAGE_DEP;
+
+struct EFI_FIRMWARE_MANAGEMENT_PROTOCOL {};
+
+typedef struct { 
+  UINT8       ImageIndex;  
+  EFI_GUID    ImageTypeId;  
+  UINT64      ImageId;  
+  CHAR16      *ImageIdName;  
+  UINT32      Version;  
+  CHAR16      *VersionName;  
+  UINTN       Size;  
+  UINT64      AttributesSupported;  
+  UINT64      AttributesSetting;  
+  UINT64      Compatibilities;  
+  UINT32      LowestSupportedImageVersion;  
+  UINT32      LastAttemptVersion;
+  UINT32      LastAttemptStatus; 
+  UINT64                    HardwareInstance;
+  EFI_FIRMWARE_IMAGE_DEP    *Dependencies;
+} EFI_FIRMWARE_IMAGE_DESCRIPTOR;
+
+typedef
+EFI_STATUS
+(*EFI_FIRMWARE_MANAGEMENT_PROTOCOL_GET_IMAGE_INFO)(
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL       *This,
+  UINTN                           *ImageInfoSize,
+  EFI_FIRMWARE_IMAGE_DESCRIPTOR   *ImageInfo,
+        UINT32                          *DescriptorVersion,
+        UINT8                           *DescriptorCount,
+        UINTN                           *DescriptorSize,
+         UINT32                          *PackageVersion,
+        CHAR16                          **PackageVersionName
+  );
+
+
+  typedef
+EFI_STATUS
+(*EFI_FIRMWARE_MANAGEMENT_PROTOCOL_GET_IMAGE)(
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL  *This,
+  UINT8                             ImageIndex,
+  void                             *Image,
+  UINTN                        *ImageSize
+  );
+
+
+typedef
+EFI_STATUS
+(*EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS)(
+  UINTN                          Completion
+  );
+
+
+  typedef
+EFI_STATUS
+(*EFI_FIRMWARE_MANAGEMENT_PROTOCOL_SET_IMAGE)(
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL                 *This,
+  UINT8                                            ImageIndex,
+  void                                      *Image,
+  UINTN                                            ImageSize,
+  void                                       *VendorCode,
+  EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS    Progress,
+  CHAR16                                           **AbortReason
+  );
+
+typedef  struct _EFI_FIRMWARE_MANAGEMENT_PROTOCOL {
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL_GET_IMAGE_INFO      GetImageInfo;
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL_GET_IMAGE           GetImage;
+  EFI_FIRMWARE_MANAGEMENT_PROTOCOL_SET_IMAGE           SetImage;
+  void         *CheckImage;
+  void *    GetPackageInfo;
+  void *    SetPackageInfo;
+} EFI_FIRMWARE_MANAGEMENT_PROTOCOL;
